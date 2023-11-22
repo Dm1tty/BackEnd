@@ -11,6 +11,7 @@ public class TextService {
     }
 
     public void simulateDelay() throws InterruptedException {
-        Thread.sleep(new Random().nextInt(4000) + 1000); // Random delay between 1 to 5 seconds
+        // random delay in the range of 1 - 5 sec
+        Thread.sleep(new Random().nextInt(4000) + 1000);
     }
 }
