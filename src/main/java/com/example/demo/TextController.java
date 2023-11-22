@@ -1,36 +1,45 @@
 package com.example.demo;
 
+import com.example.demo.TextService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-
-import java.util.Base64;
-import java.util.Random;
-
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
+
 import java.io.IOException;
 
 @RestController
 @RequestMapping("/api")
 public class TextController {
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    private final TextService textService;
 
+    @Autowired
+    public TextController(TextService textService) {
+        this.textService = textService;
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/convert")
     public ResponseBodyEmitter convertToBase64(@RequestBody String text) {
-        ResponseBodyEmitter emitter = new ResponseBodyEmitter();
+        final ResponseBodyEmitter emitter = new ResponseBodyEmitter(Long.MAX_VALUE);
+        final Object lock = new Object();
 
         new Thread(() -> {
             try {
-                String encoded = Base64.getEncoder().encodeToString(text.getBytes());
+                String encoded = textService.encodeToBase64(text);
                 for (char ch : encoded.toCharArray()) {
-                    emitter.send(String.valueOf(ch));
-                    Thread.sleep(new Random().nextInt(4000) + 1000); // Delay
+                    textService.simulateDelay();
+                    synchronized (lock) {
+                        emitter.send(String.valueOf(ch));
+                    }
                 }
-                emitter.complete();
+                synchronized (lock) {
+                    emitter.complete();
+                }
             } catch (IOException | InterruptedException e) {
-                emitter.completeWithError(e);
+                synchronized (lock) {
+                    emitter.completeWithError(e);
+                }
             }
         }).start();
 
