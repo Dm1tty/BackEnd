@@ -20,4 +20,12 @@ class TextServiceTest {
         assertEquals("SA==", encoded);
     }
 
+    @Test
+    void encodeToBase64_ShouldReturnCorrectEncodedValue_Empty() {
+        TextService service = new TextService();
+        String original = "";
+        String encoded = service.encodeToBase64(original);
+        assertEquals("", encoded);
+    }
+
 }

@@ -11,6 +11,8 @@ import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 @WebMvcTest(TextController.class)
 class TextControllerTest {
 
@@ -45,6 +47,19 @@ class TextControllerTest {
                         .contentType("text/plain"))
                 .andExpect(status().is4xxClientError());
 
+    }
+    @Test
+    public void whenSimulateDelay_thenShouldTakeOneToFiveSeconds() throws InterruptedException {
+        TextService service = new TextService();
+
+        for (int i = 0; i < 3; i++) {
+            long start = System.currentTimeMillis();
+            service.simulateDelay();
+            long end = System.currentTimeMillis();
+
+            long duration = end - start;
+            assertTrue(duration >= 1000 && duration <= 5000);
+        }
     }
 
 }
